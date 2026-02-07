@@ -32,9 +32,23 @@ from decision_broker.schemas import DecisionRequest, DecisionResponse
 from decision_broker.main import process_decision
 from decision_broker.core.auth.api_key import validate_api_key
 from decision_broker.core.billing.credits import add_credits, check_credits
-from decision_broker.core.db import get_db_connection
+from decision_broker.core.db import (
+    get_db_connection, 
+    SUBSCRIPTION_PLANS, 
+    update_subscription, 
+    get_user_by_subscription,
+    mark_subscription_charged,
+    get_low_balance_users,
+    mark_low_balance_notified
+)
 import uuid
 import secrets
+import razorpay
+
+# Initialize Razorpay client
+razorpay_client = None
+if RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET:
+    razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
 app = FastAPI(title="Decision Broker API", version="1.0.0")
 
@@ -133,6 +147,116 @@ def get_balance(x_api_key: str = Header(..., alias="X-API-Key")):
     balance = check_credits(user_id)
     return {"api_key": x_api_key[:15] + "...", "credits": balance}
 
+class SubscribeRequest(BaseModel):
+    plan: str  # starter, pro, business
+    api_key: str
+
+@app.post("/subscribe")
+def create_subscription(data: SubscribeRequest):
+    """
+    Create a Razorpay subscription for monthly auto-renewal of credits.
+    Returns a payment link for the user to complete subscription setup.
+    """
+    if not razorpay_client:
+        raise HTTPException(status_code=500, detail="Payment system not configured")
+    
+    plan = data.plan.lower()
+    if plan not in SUBSCRIPTION_PLANS:
+        raise HTTPException(status_code=400, detail=f"Invalid plan. Choose: starter, pro, business")
+    
+    # Validate API key
+    user_id = validate_api_key(data.api_key)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid API Key")
+    
+    plan_config = SUBSCRIPTION_PLANS[plan]
+    
+    try:
+        # Create Razorpay plan (or use existing)
+        # Note: In production, you'd create these plans once in Razorpay dashboard
+        # and store the plan IDs. For now, we create subscriptions directly.
+        
+        # Create subscription
+        subscription_data = {
+            "plan_id": f"plan_decision_broker_{plan}",  # You'll need to create these in Razorpay
+            "total_count": 12,  # 12 months
+            "quantity": 1,
+            "notes": {
+                "api_key": data.api_key,
+                "user_id": user_id,
+                "plan": plan
+            }
+        }
+        
+        # For now, return a payment link approach using Payment Links API
+        payment_link = razorpay_client.payment_link.create({
+            "amount": plan_config["price"],
+            "currency": "INR",
+            "description": f"Decision Broker {plan_config['name']} - {plan_config['credits']} credits/month",
+            "subscription_registration": {
+                "method": "emandate",
+                "auth_type": "netbanking",
+                "bank_account": {
+                    "beneficiary_name": "Decision Broker",
+                    "account_number": "",  # Will be filled by customer
+                    "account_type": "savings",
+                    "ifsc_code": ""
+                }
+            },
+            "notes": {
+                "api_key": data.api_key,
+                "plan": plan,
+                "credits": plan_config["credits"]
+            }
+        })
+        
+        # Store subscription intent
+        update_subscription(user_id, payment_link.get("id", "pending"), plan, "pending")
+        
+        return {
+            "success": True,
+            "payment_url": payment_link.get("short_url"),
+            "plan": plan_config["name"],
+            "monthly_price": plan_config["price"] / 100,
+            "credits_per_month": plan_config["credits"],
+            "message": "Complete payment to start your subscription"
+        }
+        
+    except Exception as e:
+        # Fallback: Return direct payment instructions
+        return {
+            "success": True,
+            "payment_url": f"https://kirito-ova.github.io/decision_broker/?plan={plan}",
+            "plan": plan_config["name"],
+            "monthly_price": plan_config["price"] / 100,
+            "credits_per_month": plan_config["credits"],
+            "message": "Visit the payment page to subscribe"
+        }
+
+@app.get("/subscription-status")
+def subscription_status(x_api_key: str = Header(..., alias="X-API-Key")):
+    """Check subscription status for an API key."""
+    user_id = validate_api_key(x_api_key)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid API Key")
+    
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute(
+            "SELECT subscription_status, subscription_plan, last_charged_at, credits FROM users WHERE id = ?",
+            (user_id,)
+        )
+        user = cursor.fetchone()
+        
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {
+        "subscription_status": user["subscription_status"] or "none",
+        "plan": user["subscription_plan"],
+        "last_charged": user["last_charged_at"],
+        "credits": user["credits"]
+    }
 
 @app.post("/decide")
 def decide(data: DecisionAPIRequest, x_api_key: str = Header(..., alias="X-API-Key")):
@@ -245,6 +369,48 @@ async def razorpay_webhook(request: Request):
                  
             new_balance = add_credits(user_id, credits)
             print(f"[PAYMENT] Added {credits} credits to {user_id}. New Balance: {new_balance}")
+            
+            return {"status": "ok"}
+        
+        # Handle subscription events for auto-renewal
+        elif event == "subscription.charged":
+            subscription = data.get("payload", {}).get("subscription", {}).get("entity", {})
+            subscription_id = subscription.get("id")
+            notes = subscription.get("notes", {})
+            
+            target_api_key = notes.get("api_key")
+            plan = notes.get("plan", "starter")
+            
+            if target_api_key:
+                user_id = validate_api_key(target_api_key)
+                if user_id:
+                    credits = SUBSCRIPTION_PLANS.get(plan, {}).get("credits", 100)
+                    mark_subscription_charged(user_id, credits)
+                    update_subscription(user_id, subscription_id, plan, "active")
+                    print(f"[SUBSCRIPTION] Auto-renewed {credits} credits for {user_id}")
+                    return {"status": "ok"}
+            
+            return {"status": "ignored - missing api_key"}
+        
+        elif event == "subscription.cancelled":
+            subscription = data.get("payload", {}).get("subscription", {}).get("entity", {})
+            subscription_id = subscription.get("id")
+            
+            user = get_user_by_subscription(subscription_id)
+            if user:
+                update_subscription(user["id"], subscription_id, user["subscription_plan"], "cancelled")
+                print(f"[SUBSCRIPTION] Cancelled for {user['id']}")
+            
+            return {"status": "ok"}
+        
+        elif event == "subscription.paused":
+            subscription = data.get("payload", {}).get("subscription", {}).get("entity", {})
+            subscription_id = subscription.get("id")
+            
+            user = get_user_by_subscription(subscription_id)
+            if user:
+                update_subscription(user["id"], subscription_id, user["subscription_plan"], "paused")
+                print(f"[SUBSCRIPTION] Paused for {user['id']}")
             
             return {"status": "ok"}
             
