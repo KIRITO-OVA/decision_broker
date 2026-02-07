@@ -1,42 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Decision Broker API - Buy Credits</title>
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
             font-family: 'Segoe UI', system-ui, sans-serif;
             background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
             min-height: 100vh;
             color: #fff;
         }
-        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
-        
-        header { text-align: center; margin-bottom: 60px; }
-        h1 { font-size: 3rem; margin-bottom: 10px; background: linear-gradient(90deg, #00d4ff, #7b2fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .tagline { font-size: 1.3rem; color: #a0a0a0; }
-        
-        .pricing { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-bottom: 60px; }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00d4ff, #7b2fff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .tagline {
+            font-size: 1.3rem;
+            color: #a0a0a0;
+        }
+
+        .pricing {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
         .plan {
-            background: rgba(255,255,255,0.05);
-            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 20px;
             padding: 40px 30px;
             text-align: center;
             transition: transform 0.3s, box-shadow 0.3s;
         }
-        .plan:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,212,255,0.2); }
-        .plan.popular { border-color: #00d4ff; background: rgba(0,212,255,0.1); }
-        .plan-name { font-size: 1.5rem; margin-bottom: 10px; }
-        .plan-price { font-size: 3rem; font-weight: bold; margin: 20px 0; }
-        .plan-price span { font-size: 1rem; color: #a0a0a0; }
-        .plan-credits { font-size: 1.2rem; color: #00d4ff; margin-bottom: 30px; }
-        .plan-features { list-style: none; margin-bottom: 30px; }
-        .plan-features li { padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
-        
+
+        .plan:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 212, 255, 0.2);
+        }
+
+        .plan.popular {
+            border-color: #00d4ff;
+            background: rgba(0, 212, 255, 0.1);
+        }
+
+        .plan-name {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+
+        .plan-price {
+            font-size: 3rem;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .plan-price span {
+            font-size: 1rem;
+            color: #a0a0a0;
+        }
+
+        .plan-credits {
+            font-size: 1.2rem;
+            color: #00d4ff;
+            margin-bottom: 30px;
+        }
+
+        .plan-features {
+            list-style: none;
+            margin-bottom: 30px;
+        }
+
+        .plan-features li {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
         .btn {
             display: inline-block;
             padding: 15px 40px;
@@ -49,42 +114,74 @@
             cursor: pointer;
             transition: transform 0.3s, box-shadow 0.3s;
         }
-        .btn:hover { transform: scale(1.05); box-shadow: 0 10px 30px rgba(0,212,255,0.4); }
-        
+
+        .btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.4);
+        }
+
         .api-key-section {
-            background: rgba(255,255,255,0.05);
+            background: rgba(255, 255, 255, 0.05);
             border-radius: 20px;
             padding: 40px;
             text-align: center;
             margin-bottom: 40px;
         }
-        .api-key-section h2 { margin-bottom: 20px; }
+
+        .api-key-section h2 {
+            margin-bottom: 20px;
+        }
+
         .api-key-input {
             width: 100%;
             max-width: 400px;
             padding: 15px 20px;
-            border: 1px solid rgba(255,255,255,0.2);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: 10px;
-            background: rgba(0,0,0,0.3);
+            background: rgba(0, 0, 0, 0.3);
             color: #fff;
             font-size: 1rem;
             margin-bottom: 10px;
         }
-        .api-key-input::placeholder { color: #666; }
-        
-        .features { text-align: center; margin-bottom: 60px; }
-        .features h2 { margin-bottom: 40px; }
-        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; }
+
+        .api-key-input::placeholder {
+            color: #666;
+        }
+
+        .features {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .features h2 {
+            margin-bottom: 40px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+
         .feature {
-            background: rgba(255,255,255,0.03);
+            background: rgba(255, 255, 255, 0.03);
             padding: 30px;
             border-radius: 15px;
         }
-        .feature h3 { color: #00d4ff; margin-bottom: 10px; }
-        
-        footer { text-align: center; padding: 40px; color: #666; }
+
+        .feature h3 {
+            color: #00d4ff;
+            margin-bottom: 10px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
     </style>
 </head>
+
 <body>
     <div class="container">
         <header>
@@ -155,23 +252,24 @@
         </div>
 
         <footer>
-            <p>API Docs: <a href="https://web-production-1ace.up.railway.app/docs" style="color: #00d4ff;">web-production-1ace.up.railway.app/docs</a></p>
+            <p>API Docs: <a href="https://web-production-1ace.up.railway.app/docs"
+                    style="color: #00d4ff;">web-production-1ace.up.railway.app/docs</a></p>
             <p style="margin-top: 10px;">© 2026 Decision Broker. All rights reserved.</p>
         </footer>
     </div>
 
     <script>
-        // Replace with your live Razorpay key
-        const RAZORPAY_KEY = 'rzp_live_XXXXXXXX'; // TODO: Replace with your key
-        
+        // Razorpay live key
+        const RAZORPAY_KEY = 'rzp_live_SDKaBS60R3VLkH';
+
         function pay(amount, credits) {
             const apiKey = document.getElementById('apiKey').value.trim();
-            
+
             if (!apiKey) {
                 alert('Please enter your API key first!');
                 return;
             }
-            
+
             const options = {
                 key: RAZORPAY_KEY,
                 amount: amount,
@@ -181,7 +279,7 @@
                 notes: {
                     api_key: apiKey
                 },
-                handler: function(response) {
+                handler: function (response) {
                     alert('Payment successful! ' + credits + ' credits will be added to your account shortly.');
                 },
                 prefill: {
@@ -192,10 +290,11 @@
                     color: '#7b2fff'
                 }
             };
-            
+
             const rzp = new Razorpay(options);
             rzp.open();
         }
     </script>
 </body>
+
 </html>
