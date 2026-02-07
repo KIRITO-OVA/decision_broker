@@ -1,80 +1,201 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Decision Broker | Deterministic APIs for AI</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Decision Broker API - Buy Credits</title>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        
+        header { text-align: center; margin-bottom: 60px; }
+        h1 { font-size: 3rem; margin-bottom: 10px; background: linear-gradient(90deg, #00d4ff, #7b2fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .tagline { font-size: 1.3rem; color: #a0a0a0; }
+        
+        .pricing { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-bottom: 60px; }
+        .plan {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .plan:hover { transform: translateY(-10px); box-shadow: 0 20px 40px rgba(0,212,255,0.2); }
+        .plan.popular { border-color: #00d4ff; background: rgba(0,212,255,0.1); }
+        .plan-name { font-size: 1.5rem; margin-bottom: 10px; }
+        .plan-price { font-size: 3rem; font-weight: bold; margin: 20px 0; }
+        .plan-price span { font-size: 1rem; color: #a0a0a0; }
+        .plan-credits { font-size: 1.2rem; color: #00d4ff; margin-bottom: 30px; }
+        .plan-features { list-style: none; margin-bottom: 30px; }
+        .plan-features li { padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.1); }
+        
+        .btn {
+            display: inline-block;
+            padding: 15px 40px;
+            background: linear-gradient(90deg, #00d4ff, #7b2fff);
+            border: none;
+            border-radius: 30px;
+            color: #fff;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .btn:hover { transform: scale(1.05); box-shadow: 0 10px 30px rgba(0,212,255,0.4); }
+        
+        .api-key-section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .api-key-section h2 { margin-bottom: 20px; }
+        .api-key-input {
+            width: 100%;
+            max-width: 400px;
+            padding: 15px 20px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            font-size: 1rem;
+            margin-bottom: 10px;
+        }
+        .api-key-input::placeholder { color: #666; }
+        
+        .features { text-align: center; margin-bottom: 60px; }
+        .features h2 { margin-bottom: 40px; }
+        .feature-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; }
+        .feature {
+            background: rgba(255,255,255,0.03);
+            padding: 30px;
+            border-radius: 15px;
+        }
+        .feature h3 { color: #00d4ff; margin-bottom: 10px; }
+        
+        footer { text-align: center; padding: 40px; color: #666; }
+    </style>
 </head>
-
 <body>
     <div class="container">
         <header>
-            <h1>Decision Broker</h1>
-            <p class="subtitle">Deterministic decision APIs for AI Agents & Automation</p>
+            <h1>🧠 Decision Broker API</h1>
+            <p class="tagline">AI-Powered Decision Intelligence for Your Business</p>
         </header>
 
-        <section id="features">
-            <h2>Why Decision Broker?</h2>
-            <p>
-                Stop hard-coding logic. Let your AI ask better questions.
-                We provide a reliable, deterministic API layer for critical decision-making in your agentic workflows.
-            </p>
-        </section>
+        <div class="api-key-section">
+            <h2>Enter Your API Key</h2>
+            <input type="text" id="apiKey" class="api-key-input" placeholder="sk_your_api_key_here">
+            <p style="color: #666; font-size: 0.9rem;">Your credits will be added to this API key</p>
+        </div>
 
-        <section id="how-it-works">
-            <h2>How It Works</h2>
-            <ol>
-                <li><strong>Buy Credits:</strong> Purchase a credit pack via standardized payment.</li>
-                <li><strong>Call API:</strong> Send a POST request to <code>/decide</code> with your payload and API
-                    Key.</li>
-                <li><strong>Get Intelligence:</strong> Receive a deterministic decision (e.g., "wait",
-                    "switch_provider") instantly. Credits are deducted automatically.</li>
-            </ol>
-        </section>
+        <div class="pricing">
+            <div class="plan">
+                <div class="plan-name">Starter</div>
+                <div class="plan-price">₹199 <span>one-time</span></div>
+                <div class="plan-credits">100 Credits</div>
+                <ul class="plan-features">
+                    <li>₹1.99 per decision</li>
+                    <li>All decision types</li>
+                    <li>API access</li>
+                </ul>
+                <button class="btn" onclick="pay(19900, 100)">Buy Now</button>
+            </div>
 
-        <section id="pricing">
-            <h2>Pricing</h2>
-            <p>Simple credit-based pricing. 1 decision = 1 credit.</p>
+            <div class="plan popular">
+                <div class="plan-name">⭐ Professional</div>
+                <div class="plan-price">₹499 <span>one-time</span></div>
+                <div class="plan-credits">500 Credits</div>
+                <ul class="plan-features">
+                    <li>₹0.99 per decision</li>
+                    <li>All decision types</li>
+                    <li>Priority support</li>
+                </ul>
+                <button class="btn" onclick="pay(49900, 500)">Buy Now</button>
+            </div>
 
-            <div class="pricing-grid">
-                <div class="card">
-                    <h3>Starter</h3>
-                    <div class="price">₹199</div>
-                    <div class="credits">100 Credits</div>
-                    <p>Perfect for testing and small bots.</p>
+            <div class="plan">
+                <div class="plan-name">Enterprise</div>
+                <div class="plan-price">₹999 <span>one-time</span></div>
+                <div class="plan-credits">2000 Credits</div>
+                <ul class="plan-features">
+                    <li>₹0.49 per decision</li>
+                    <li>All decision types</li>
+                    <li>Premium support</li>
+                </ul>
+                <button class="btn" onclick="pay(99900, 2000)">Buy Now</button>
+            </div>
+        </div>
+
+        <div class="features">
+            <h2>What You Get</h2>
+            <div class="feature-grid">
+                <div class="feature">
+                    <h3>🎯 Sales Outreach</h3>
+                    <p>Know the perfect time to contact your leads for maximum response rates.</p>
                 </div>
-                <div class="card">
-                    <h3>Builder</h3>
-                    <div class="price">₹499</div>
-                    <div class="credits">500 Credits</div>
-                    <p>For active development.</p>
+                <div class="feature">
+                    <h3>🤖 Model Selection</h3>
+                    <p>Choose the optimal AI model for your specific task automatically.</p>
                 </div>
-                <div class="card">
-                    <h3>Scale</h3>
-                    <div class="price">₹999</div>
-                    <div class="credits">2000 Credits</div>
-                    <p>Best value for production.</p>
+                <div class="feature">
+                    <h3>🔄 Retry Intelligence</h3>
+                    <p>Smart retry strategies for failed API calls with exponential backoff.</p>
                 </div>
             </div>
-        </section>
-
-        <section class="contact-info">
-            <h2>Contact Us</h2>
-            <p>Questions? Need custom integration?</p>
-            <p><strong>Email:</strong> support@decisionbroker.ai</p>
-            <p><strong>Address:</strong> Decision Broker Ops, Bangalore, KA, India</p>
-        </section>
+        </div>
 
         <footer>
-            <a href="legal.html">Terms & Conditions</a> |
-            <a href="legal.html">Privacy Policy</a> |
-            <a href="legal.html">Refund Policy</a>
-            <br><br>
-            &copy; 2024 Decision Broker. All rights reserved.
+            <p>API Docs: <a href="https://web-production-1ace.up.railway.app/docs" style="color: #00d4ff;">web-production-1ace.up.railway.app/docs</a></p>
+            <p style="margin-top: 10px;">© 2026 Decision Broker. All rights reserved.</p>
         </footer>
     </div>
-</body>
 
+    <script>
+        // Replace with your live Razorpay key
+        const RAZORPAY_KEY = 'rzp_live_XXXXXXXX'; // TODO: Replace with your key
+        
+        function pay(amount, credits) {
+            const apiKey = document.getElementById('apiKey').value.trim();
+            
+            if (!apiKey) {
+                alert('Please enter your API key first!');
+                return;
+            }
+            
+            const options = {
+                key: RAZORPAY_KEY,
+                amount: amount,
+                currency: 'INR',
+                name: 'Decision Broker',
+                description: credits + ' API Credits',
+                notes: {
+                    api_key: apiKey
+                },
+                handler: function(response) {
+                    alert('Payment successful! ' + credits + ' credits will be added to your account shortly.');
+                },
+                prefill: {
+                    email: '',
+                    contact: ''
+                },
+                theme: {
+                    color: '#7b2fff'
+                }
+            };
+            
+            const rzp = new Razorpay(options);
+            rzp.open();
+        }
+    </script>
+</body>
 </html>
