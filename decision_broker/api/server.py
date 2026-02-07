@@ -34,6 +34,9 @@ from decision_broker.core.auth.api_key import validate_api_key
 from decision_broker.core.billing.credits import add_credits, check_credits
 from decision_broker.core.db import (
     get_db_connection, 
+    get_cursor,
+    normalize_query,
+    DATABASE_URL,
     SUBSCRIPTION_PLANS, 
     update_subscription, 
     get_user_by_subscription,
@@ -266,8 +269,9 @@ def signup(data: SignupRequest):
     user_id = f"user_{uuid.uuid4().hex[:12]}"
     api_key = f"sk_live_{secrets.token_hex(16)}"
     
+    is_pg = bool(DATABASE_URL)
     with get_db_connection() as conn:
-        cursor = conn.cursor()
+        cursor = get_cursor(conn)
         
         # Check if email already exists (add email column if needed)
         try:
@@ -277,7 +281,7 @@ def signup(data: SignupRequest):
             pass  # Column already exists
         
         # Check for existing user with this email
-        cursor.execute("SELECT api_key FROM users WHERE email = ?", (email,))
+        cursor.execute(normalize_query("SELECT id, api_key FROM users WHERE email = ?", is_pg), (email,))
         existing = cursor.fetchone()
         
         if existing:
@@ -291,7 +295,7 @@ def signup(data: SignupRequest):
         
         # Create new user with 5 free credits
         cursor.execute(
-            "INSERT INTO users (id, api_key, credits, email) VALUES (?, ?, ?, ?)",
+            normalize_query("INSERT INTO users (id, api_key, credits, email) VALUES (?, ?, ?, ?)", is_pg),
             (user_id, api_key, 5, email)
         )
         conn.commit()
@@ -513,14 +517,14 @@ def crypto_verify(data: CryptoVerifyRequest):
             credits_to_add = 100 
             
             # Ensure we only process this TX hash once
+            is_pg = bool(DATABASE_URL)
             with get_db_connection() as conn:
-                cursor = conn.cursor()
-                cursor.execute("CREATE TABLE IF NOT EXISTS crypto_transactions (tx_hash TEXT PRIMARY KEY, user_id TEXT, processed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP)")
-                cursor.execute("SELECT tx_hash FROM crypto_transactions WHERE tx_hash = ?", (tx_hash,))
+                cursor = get_cursor(conn)
+                cursor.execute(normalize_query("SELECT tx_hash FROM crypto_transactions WHERE tx_hash = ?", is_pg), (tx_hash,))
                 if cursor.fetchone():
                     raise HTTPException(status_code=400, detail="Transaction already processed")
                 
-                cursor.execute("INSERT INTO crypto_transactions (tx_hash, user_id) VALUES (?, ?)", (tx_hash, user_id))
+                cursor.execute(normalize_query("INSERT INTO crypto_transactions (tx_hash, user_id) VALUES (?, ?)", is_pg), (tx_hash, user_id))
                 conn.commit()
 
             new_balance = add_credits(user_id, credits_to_add)
