@@ -36,6 +36,7 @@ from decision_broker.core.db import (
     get_db_connection, 
     get_cursor,
     normalize_query,
+    init_db,
     DATABASE_URL,
     SUBSCRIPTION_PLANS, 
     update_subscription, 
@@ -139,6 +140,18 @@ app.add_middleware(
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
+
+@app.on_event("startup")
+async def startup_event():
+    """Ensure database is initialized on server start."""
+    try:
+        print("[INFO] Initializing database...")
+        init_db()
+        print("[INFO] Database initialized successfully.")
+    except Exception as e:
+        print(f"[CRITICAL] Database initialization failed: {e}")
+        # We don't raise here to allow the server to boot and potentially recover 
+        # or allow health checks to pass while we debug.
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):

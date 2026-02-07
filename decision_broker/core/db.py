@@ -164,5 +164,5 @@ def mark_low_balance_notified(user_id: str):
         cursor.execute(normalize_query("UPDATE users SET low_balance_notified = 1 WHERE id = ?", is_pg), (user_id,))
         conn.commit()
 
-# Initialize on import
-init_db()
+# Removed top-level init_db() to prevent startup crashes.
+# It is now called during the FastAPI startup event in server.py.
