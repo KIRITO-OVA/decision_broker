@@ -50,7 +50,75 @@ razorpay_client = None
 if RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET:
     razorpay_client = razorpay.Client(auth=(RAZORPAY_KEY_ID, RAZORPAY_KEY_SECRET))
 
-app = FastAPI(title="Decision Broker API", version="1.0.0")
+# Custom API description with markdown
+API_DESCRIPTION = """
+# 🧠 Decision Broker - AI-to-AI Decision Intelligence
+
+**Intelligent decision-making API for AI agents and automation systems.**
+
+## What This API Does
+
+Your AI calls our API to get smart decisions for:
+
+| Decision Type | Use Case |
+|--------------|----------|
+| **sales_outreach** | When and how to contact leads |
+| **model_selection** | Which AI model to use for a task |
+| **retry_intelligence** | When to retry failed operations |
+
+## Quick Start
+
+1. **Get an API Key** - Call `/signup` with your email
+2. **Make Decisions** - Call `/decide` with your scenario
+3. **Check Balance** - Call `/balance` to see credits
+
+## Authentication
+
+All `/decide` calls require an `X-API-Key` header.
+
+```
+X-API-Key: sk_live_your_api_key_here
+```
+
+## Pricing
+
+| Plan | Credits | Price |
+|------|---------|-------|
+| Starter | 100 | ₹199 |
+| Pro | 500 | ₹499 |
+| Business | 2000 | ₹999 |
+
+---
+
+Built for AI agents, by AI engineers. 🤖
+"""
+
+# Custom Swagger UI configuration
+swagger_ui_parameters = {
+    "syntaxHighlight.theme": "monokai",
+    "docExpansion": "list",
+    "filter": True,
+    "deepLinking": True,
+    "displayRequestDuration": True,
+    "defaultModelsExpandDepth": 1,
+    "persistAuthorization": True,
+}
+
+app = FastAPI(
+    title="Decision Broker API",
+    description=API_DESCRIPTION,
+    version="2.0.0",
+    contact={
+        "name": "Decision Broker Support",
+        "url": "https://kirito-ova.github.io/decision_broker/",
+    },
+    license_info={
+        "name": "Commercial",
+    },
+    swagger_ui_parameters=swagger_ui_parameters,
+    redoc_url="/redoc",
+    docs_url="/docs",
+)
 
 # CORS for RapidAPI testing console
 app.add_middleware(
