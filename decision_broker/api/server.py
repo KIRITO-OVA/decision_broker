@@ -31,7 +31,10 @@ else:
 from decision_broker.schemas import DecisionRequest, DecisionResponse
 from decision_broker.main import process_decision
 from decision_broker.core.auth.api_key import validate_api_key
-from decision_broker.core.billing.credits import add_credits
+from decision_broker.core.billing.credits import add_credits, check_credits
+from decision_broker.core.db import get_db_connection
+import uuid
+import secrets
 
 app = FastAPI(title="Decision Broker API", version="1.0.0")
 
@@ -48,13 +51,21 @@ class DecisionAPIRequest(BaseModel):
     decision_type: str
     payload: Dict[str, Any]
 
+class SignupRequest(BaseModel):
+    email: str
+
+class SignupResponse(BaseModel):
+    success: bool
+    api_key: str
+    message: str
+
 @app.get("/")
 def root():
     """Root endpoint - API info."""
     return {
         "api": "Decision Broker",
         "version": "1.0.0",
-        "endpoints": ["/health", "/decide"],
+        "endpoints": ["/health", "/decide", "/signup", "/balance"],
         "docs": "/docs"
     }
 
@@ -62,6 +73,65 @@ def root():
 def health_check():
     """Health check endpoint for RapidAPI monitoring."""
     return {"status": "ok", "version": "1.0.0"}
+
+@app.post("/signup", response_model=SignupResponse)
+def signup(data: SignupRequest):
+    """
+    Create a new user account and generate an API key.
+    New users start with 5 free credits.
+    """
+    email = data.email.strip().lower()
+    
+    if not email or "@" not in email:
+        raise HTTPException(status_code=400, detail="Invalid email address")
+    
+    # Generate unique user ID and API key
+    user_id = f"user_{uuid.uuid4().hex[:12]}"
+    api_key = f"sk_live_{secrets.token_hex(16)}"
+    
+    with get_db_connection() as conn:
+        cursor = conn.cursor()
+        
+        # Check if email already exists (add email column if needed)
+        try:
+            cursor.execute("ALTER TABLE users ADD COLUMN email TEXT")
+            conn.commit()
+        except:
+            pass  # Column already exists
+        
+        # Check for existing user with this email
+        cursor.execute("SELECT api_key FROM users WHERE email = ?", (email,))
+        existing = cursor.fetchone()
+        
+        if existing:
+            return SignupResponse(
+                success=True,
+                api_key=existing["api_key"],
+                message="Account already exists. Here's your API key."
+            )
+        
+        # Create new user with 5 free credits
+        cursor.execute(
+            "INSERT INTO users (id, api_key, credits, email) VALUES (?, ?, ?, ?)",
+            (user_id, api_key, 5, email)
+        )
+        conn.commit()
+    
+    return SignupResponse(
+        success=True,
+        api_key=api_key,
+        message="Account created! You have 5 free credits to start."
+    )
+
+@app.get("/balance")
+def get_balance(x_api_key: str = Header(..., alias="X-API-Key")):
+    """Check credit balance for an API key."""
+    user_id = validate_api_key(x_api_key)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid API Key")
+    
+    balance = check_credits(user_id)
+    return {"api_key": x_api_key[:15] + "...", "credits": balance}
 
 
 @app.post("/decide")
