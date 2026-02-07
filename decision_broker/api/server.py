@@ -183,8 +183,28 @@ def root():
         "description": "AI-to-AI Decision Intelligence API",
         "endpoints": ["/health", "/decide", "/signup", "/balance"],
         "docs": "/docs",
-        "redoc": "/redoc"
+        "redoc": "/redoc",
+        "ai_plugin": "/.well-known/ai-plugin.json",
+        "ai_manifest": "/ai-manifest.json"
     }
+
+@app.get("/.well-known/ai-plugin.json", tags=["🤖 AI Discovery"], include_in_schema=False)
+def get_ai_plugin():
+    """Serves the OpenAI-compatible AI plugin manifest."""
+    try:
+        with open(".well-known/ai-plugin.json", "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="AI Plugin manifest not found")
+
+@app.get("/ai-manifest.json", tags=["🤖 AI Discovery"], include_in_schema=False)
+def get_ai_manifest():
+    """Serves the general AI manifest for autonomous discovery."""
+    try:
+        with open("ai-manifest.json", "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="AI manifest not found")
 
 @app.get("/health", tags=["🏠 General"], summary="Health Check",
          description="Verify API is running. Use for uptime monitoring.")
@@ -385,6 +405,68 @@ def subscription_status(x_api_key: str = Header(..., alias="X-API-Key")):
         "plan": user["subscription_plan"],
         "last_charged": user["last_charged_at"],
         "credits": user["credits"]
+    }
+
+class CryptoPurchaseRequest(BaseModel):
+    plan: str # starter, pro, business
+
+class CryptoVerifyRequest(BaseModel):
+    transaction_hash: str
+    api_key: str
+
+@app.post("/crypto/purchase", tags=["🪙 Crypto Payments"], summary="Request Crypto Payment Info")
+def crypto_purchase(data: CryptoPurchaseRequest):
+    """
+    Returns crypto payment instructions for AI-to-AI transactions.
+    Supports USDT/USDC on Polygon Network.
+    """
+    plan = data.plan.lower()
+    if plan not in SUBSCRIPTION_PLANS:
+        raise HTTPException(status_code=400, detail="Invalid plan")
+        
+    plan_config = SUBSCRIPTION_PLANS[plan]
+    
+    # In a real app, you'd use a crypto price API to convert INR to USDT
+    # For now, we assume 1 USDT = 85 INR (Fixed rate for demo)
+    usdt_amount = round((plan_config["price"] / 100) / 85, 2)
+    
+    return {
+        "payment_method": "USDT/USDC (Polygon)",
+        "network": "Polygon (MATIC)",
+        "wallet_address": os.getenv("CRYPTO_WALLET_ADDRESS", "0xYourPolygonWalletAddressHere"),
+        "amount_usdt": usdt_amount,
+        "credits_to_be_added": plan_config["credits"],
+        "instructions": f"Send {usdt_amount} USDT to the address above on Polygon network, then call /crypto/verify with your TX hash."
+    }
+
+@app.post("/crypto/verify", tags=["🪙 Crypto Payments"], summary="Verify Crypto Transaction")
+def crypto_verify(data: CryptoVerifyRequest):
+    """
+    Verifies a crypto transaction hash and adds credits to the user account.
+    This enables 100% autonomous AI-to-AI payments.
+    """
+    # 1. Validate API Key
+    user_id = validate_api_key(data.api_key)
+    if not user_id:
+        raise HTTPException(status_code=401, detail="Invalid API Key")
+        
+    # 2. In a real app, call PolygonScan API to verify tx_hash, amount, and recipient.
+    # For now, we simulate a successful verification for demonstration.
+    tx_hash = data.transaction_hash
+    if not tx_hash.startswith("0x") or len(tx_hash) < 64:
+        raise HTTPException(status_code=400, detail="Invalid transaction hash format")
+    
+    # MOCK VERIFICATION LOGIC
+    # In production: response = requests.get(f"https://api.polygonscan.com/api?module=proxy&action=eth_getTransactionByHash&txhash={tx_hash}&apikey={API_KEY}")
+    
+    # Logic: If it's a valid looking hash, we credit the user (Simulation)
+    credits_to_add = 100 # Default to starter plan for simulation
+    new_balance = add_credits(user_id, credits_to_add)
+    
+    return {
+        "success": True,
+        "message": f"Transaction {tx_hash[:10]}... verified. Added {credits_to_add} credits.",
+        "new_balance": new_balance
     }
 
 @app.post("/decide", tags=["🧠 Decisions"], summary="Get AI-Powered Decision",

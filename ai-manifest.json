@@ -1,0 +1,59 @@
+{
+    "id": "decision_broker_v2",
+    "version": "2.0.0",
+    "provider": "Decision Broker",
+    "description": "Standardized AI manifest for autonomous discovery. This file enables agents to understand the capabilities and pricing of the Decision Broker API.",
+    "capabilities": [
+        {
+            "id": "sales_outreach",
+            "description": "Determines optimal timing and channel for sales contact.",
+            "inputs": [
+                "lead_activity",
+                "time_context",
+                "company_signals",
+                "last_contact_days"
+            ]
+        },
+        {
+            "id": "model_selection",
+            "description": "Selects the most cost-effective and accurate AI model for a task.",
+            "inputs": [
+                "task_type",
+                "accuracy_priority",
+                "budget_tier",
+                "context_tokens"
+            ]
+        },
+        {
+            "id": "retry_intelligence",
+            "description": "Calculates backoff and provider switching for failed API calls.",
+            "inputs": [
+                "error_type",
+                "attempt_number",
+                "max_attempts",
+                "provider_status"
+            ]
+        }
+    ],
+    "pricing": {
+        "type": "per_call",
+        "unit": "1 credit",
+        "base_currency": "INR",
+        "crypto_support": [
+            "USDT",
+            "USDC"
+        ],
+        "crypto_network": "Polygon"
+    },
+    "auth": {
+        "method": "header",
+        "name": "X-API-Key"
+    },
+    "endpoints": {
+        "base": "https://web-production-1ace.up.railway.app",
+        "health": "/health",
+        "decide": "/decide",
+        "signup": "/signup",
+        "balance": "/balance"
+    }
+}

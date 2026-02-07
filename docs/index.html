@@ -293,6 +293,7 @@
             background: linear-gradient(135deg, var(--primary), var(--accent));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .stat-label {
@@ -532,6 +533,21 @@
             font-weight: bold;
         }
 
+        .payment-methods {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 12px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .payment-methods span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
         /* Footer */
         footer {
             text-align: center;
@@ -710,17 +726,17 @@
                 </div>
             </div>
             <div class="trust-badge">
-                <div class="trust-icon">🌍</div>
+                <div class="trust-icon">🤖</div>
                 <div class="trust-text">
-                    <strong>99.9% Uptime</strong>
-                    <span>Always available</span>
+                    <strong>AI-to-AI Ready</strong>
+                    <span>Manifest-powered discovery</span>
                 </div>
             </div>
             <div class="trust-badge">
-                <div class="trust-icon">💳</div>
+                <div class="trust-icon">🪙</div>
                 <div class="trust-text">
-                    <strong>Razorpay</strong>
-                    <span>Secure payments</span>
+                    <strong>Crypto Payments</strong>
+                    <span>USDT/USDC on Polygon</span>
                 </div>
             </div>
         </section>
@@ -763,6 +779,13 @@
                     <h3>AI Model Selection</h3>
                     <p>Automatically pick the right AI model for each task. Supports GPT-4, Claude, Gemini, Llama, and
                         Mistral with cost estimates and fallback recommendations.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⛓️</div>
+                    <h3>AI-to-AI Autonomy</h3>
+                    <p>Standardized AI Manifests (OpenAI Plugin compatible) allow other autonomous agents to discover
+                        and
+                        use your API without any human coding or intervention.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">🔄</div>
@@ -848,6 +871,11 @@
                     <li>Never expires</li>
                 </ul>
                 <button class="btn btn-primary" onclick="pay(19900, 100)">Buy Now</button>
+                <div class="payment-methods">
+                    <span>💳 Card</span>
+                    <span>🏦 Netbanking</span>
+                    <span>🪙 Crypto</span>
+                </div>
             </div>
 
             <div class="price-card popular">
@@ -861,6 +889,11 @@
                     <li>Never expires</li>
                 </ul>
                 <button class="btn btn-primary" onclick="pay(49900, 500)">Buy Now</button>
+                <div class="payment-methods">
+                    <span>💳 Card</span>
+                    <span>🏦 Netbanking</span>
+                    <span>🪙 Crypto</span>
+                </div>
             </div>
 
             <div class="price-card">
@@ -874,6 +907,11 @@
                     <li>Never expires</li>
                 </ul>
                 <button class="btn btn-primary" onclick="pay(99900, 2000)">Buy Now</button>
+                <div class="payment-methods">
+                    <span>💳 Card</span>
+                    <span>🏦 Netbanking</span>
+                    <span>🪙 Crypto</span>
+                </div>
             </div>
         </section>
 

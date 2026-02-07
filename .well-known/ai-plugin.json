@@ -1,0 +1,19 @@
+{
+    "schema_version": "v1",
+    "name_for_model": "DecisionBroker",
+    "name_for_human": "Decision Broker API",
+    "description_for_model": "API for AI agents to get intelligent decisions for sales outreach timing, LLM model selection, and API retry strategies. It uses specialized scoring engines to provide optimal actions for AI workflows.",
+    "description_for_human": "AI-to-AI Decision Intelligence. Optimize your sales, model usage, and error handling with smart, credit-based decisions.",
+    "auth": {
+        "type": "user_http",
+        "authorization_type": "bearer"
+    },
+    "api": {
+        "type": "openapi",
+        "url": "https://web-production-1ace.up.railway.app/openapi.json",
+        "is_user_authenticated": false
+    },
+    "logo_url": "https://kirito-ova.github.io/decision_broker/logo.png",
+    "contact_email": "support@decisionbroker.ai",
+    "legal_info_url": "https://kirito-ova.github.io/decision_broker/legal"
+}
