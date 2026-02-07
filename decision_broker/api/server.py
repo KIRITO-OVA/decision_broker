@@ -48,6 +48,16 @@ class DecisionAPIRequest(BaseModel):
     decision_type: str
     payload: Dict[str, Any]
 
+@app.get("/")
+def root():
+    """Root endpoint - API info."""
+    return {
+        "api": "Decision Broker",
+        "version": "1.0.0",
+        "endpoints": ["/health", "/decide"],
+        "docs": "/docs"
+    }
+
 @app.get("/health")
 def health_check():
     """Health check endpoint for RapidAPI monitoring."""
