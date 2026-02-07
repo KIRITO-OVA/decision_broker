@@ -1,3 +1,4 @@
+from typing import Optional
 from decision_broker.core.db import get_db_connection, get_cursor, normalize_query, DATABASE_URL
 
 def validate_api_key(api_key: str) -> Optional[str]:
