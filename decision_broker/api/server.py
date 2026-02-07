@@ -130,33 +130,83 @@ app.add_middleware(
 )
 
 class DecisionAPIRequest(BaseModel):
+    """Request body for making a decision."""
     decision_type: str
     payload: Dict[str, Any]
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "decision_type": "sales_outreach",
+                "payload": {
+                    "lead_activity": "high",
+                    "time_context": {"hour": 10, "weekday": "tuesday"},
+                    "company_signals": {"recent_hiring": True},
+                    "last_contact_days": 7
+                }
+            }
+        }
 
 class SignupRequest(BaseModel):
+    """Request body for creating a new account."""
     email: str
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "email": "developer@company.com"
+            }
+        }
 
 class SignupResponse(BaseModel):
+    """Response after successful account creation."""
     success: bool
     api_key: str
     message: str
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "success": True,
+                "api_key": "sk_live_abc123def456...",
+                "message": "Account created! You have 5 free credits."
+            }
+        }
 
-@app.get("/")
+@app.get("/", tags=["🏠 General"], summary="API Information", 
+         description="Get basic API information and available endpoints.")
 def root():
-    """Root endpoint - API info."""
+    """Returns API metadata and available endpoints."""
     return {
         "api": "Decision Broker",
-        "version": "1.0.0",
+        "version": "2.0.0",
+        "description": "AI-to-AI Decision Intelligence API",
         "endpoints": ["/health", "/decide", "/signup", "/balance"],
-        "docs": "/docs"
+        "docs": "/docs",
+        "redoc": "/redoc"
     }
 
-@app.get("/health")
+@app.get("/health", tags=["🏠 General"], summary="Health Check",
+         description="Verify API is running. Use for uptime monitoring.")
 def health_check():
-    """Health check endpoint for RapidAPI monitoring."""
-    return {"status": "ok", "version": "1.0.0"}
+    """Returns OK if the API is operational."""
+    return {"status": "ok", "version": "2.0.0", "uptime": "operational"}
 
-@app.post("/signup", response_model=SignupResponse)
+@app.post("/signup", response_model=SignupResponse, tags=["🔐 Authentication"],
+          summary="Create Account & Get API Key",
+          description="""
+**Create a new account and receive your API key instantly.**
+
+### What You Get:
+- ✅ Unique API key (starts with `sk_live_`)
+- ✅ **5 FREE credits** to test the API
+- ✅ Instant access to all decision types
+
+### Next Steps:
+1. Copy your API key
+2. Add it to the `X-API-Key` header
+3. Call `/decide` to make decisions
+""")
 def signup(data: SignupRequest):
     """
     Create a new user account and generate an API key.
@@ -205,7 +255,16 @@ def signup(data: SignupRequest):
         message="Account created! You have 5 free credits to start."
     )
 
-@app.get("/balance")
+@app.get("/balance", tags=["💳 Billing"], summary="Check Credit Balance",
+         description="""
+**Check how many credits you have remaining.**
+
+Requires your API key in the `X-API-Key` header.
+
+### Response:
+- `credits`: Number of decisions you can make
+- Each `/decide` call uses 1 credit
+""")
 def get_balance(x_api_key: str = Header(..., alias="X-API-Key")):
     """Check credit balance for an API key."""
     user_id = validate_api_key(x_api_key)
@@ -326,7 +385,30 @@ def subscription_status(x_api_key: str = Header(..., alias="X-API-Key")):
         "credits": user["credits"]
     }
 
-@app.post("/decide")
+@app.post("/decide", tags=["🧠 Decisions"], summary="Get AI-Powered Decision",
+          description="""
+**The core endpoint - get intelligent decisions for your AI workflows.**
+
+### Decision Types:
+
+| Type | What It Does | Example Use Case |
+|------|--------------|------------------|
+| `sales_outreach` | When & how to contact leads | CRM automation |
+| `model_selection` | Which AI model to use | Multi-model systems |
+| `retry_intelligence` | When to retry failed calls | API orchestration |
+
+### Authentication:
+Add your API key to the `X-API-Key` header.
+
+### Cost:
+**1 credit per decision** (₹0.49 - ₹1.99 depending on plan)
+
+### Response:
+- `decision`: The recommended action (e.g., "contact_now_via_email")
+- `confidence`: Score from 0.0 to 1.0
+- `ttl`: Seconds until you should re-evaluate
+- `reason_code`: Why this decision was made
+""")
 def decide(data: DecisionAPIRequest, x_api_key: str = Header(..., alias="X-API-Key")):
     """
     Core decision endpoint.
