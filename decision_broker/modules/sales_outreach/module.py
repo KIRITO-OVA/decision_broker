@@ -43,8 +43,8 @@ class SalesOutreachModule(DecisionModule):
         # Using built-in score method which uses locally defined weights
         score_val = self.score(signals)
         
-        # 3. Decision Rules
-        result = decision_from_score(score_val)
+        # 3. Decision Rules (pass signals for channel selection)
+        result = decision_from_score(score_val, signals)
         
         # 4. Construct Response
         return DecisionResponse(

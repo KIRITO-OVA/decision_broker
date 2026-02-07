@@ -49,8 +49,8 @@ class RetryIntelligenceModule(DecisionModule):
         # 2. Score
         score_val = self.score(signals)
         
-        # 3. Decision Rules
-        result = decision_from_score(score_val)
+        # 3. Decision Rules (pass signals for context-aware decisions)
+        result = decision_from_score(score_val, signals)
         
         # 4. Construct Response
         return DecisionResponse(
