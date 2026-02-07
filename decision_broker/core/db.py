@@ -96,7 +96,7 @@ def init_db():
                           ("test_user", "sk_test_12345", 1000))
             print("Initialized DB with test user: sk_test_12345 (1000 credits)")
         
-        # Add new columns if they don't exist (Migration handles)
+        # Add new columns only if they don't exist
         migration_cols = [
             ("email", "TEXT"),
             ("subscription_id", "TEXT"),
@@ -106,11 +106,18 @@ def init_db():
             ("low_balance_notified", "INTEGER DEFAULT 0")
         ]
         
+        # Get existing columns for 'users'
+        if is_pg:
+            cursor.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'users'")
+            existing_cols = {row['column_name'] for row in cursor.fetchall()}
+        else:
+            cursor.execute("PRAGMA table_info(users)")
+            existing_cols = {row[1] for row in cursor.fetchall()}
+            
         for col_name, col_type in migration_cols:
-            try:
+            if col_name not in existing_cols:
+                print(f"[INFO] Adding missing column: {col_name}")
                 cursor.execute(normalize_query(f"ALTER TABLE users ADD COLUMN {col_name} {col_type}", is_pg))
-            except Exception:
-                pass # Column likely exists
         
         conn.commit()
 
