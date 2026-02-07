@@ -1,7 +1,6 @@
 import sqlite3
 import os
-import psycopg2
-from psycopg2.extras import RealDictCursor
+import time
 from contextlib import contextmanager
 import re
 
@@ -15,6 +14,9 @@ SUBSCRIPTION_PLANS = {
 }
 
 DATABASE_URL = os.getenv("DATABASE_URL")
+if DATABASE_URL and DATABASE_URL.startswith("postgres://"):
+    # Fix for newer libraries that require postgresql:// instead of postgres://
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 
 def normalize_query(query: str, is_postgres: bool = False) -> str:
     """Converts SQLite '?' placeholders to PostgreSQL '%s' if needed."""
@@ -23,16 +25,24 @@ def normalize_query(query: str, is_postgres: bool = False) -> str:
     return query
 
 @contextmanager
-def get_db_connection():
-    """Context manager for database connection. Supports SQLite and PostgreSQL."""
+def get_db_connection(max_retries: int = 3):
+    """Context manager for database connection. Supports SQLite and PostgreSQL with retries."""
     if DATABASE_URL:
         # PostgreSQL (Production)
-        conn = psycopg2.connect(DATABASE_URL)
-        conn.autocommit = False
-        try:
-            yield conn
-        finally:
-            conn.close()
+        import psycopg2
+        last_error = None
+        for attempt in range(max_retries):
+            try:
+                conn = psycopg2.connect(DATABASE_URL)
+                conn.autocommit = False
+                yield conn
+                return
+            except Exception as e:
+                last_error = e
+                print(f"[RETRY] DB Connection attempt {attempt+1} failed: {e}")
+                if attempt < max_retries - 1:
+                    time.sleep(2)
+        raise last_error
     else:
         # SQLite (Local Dev)
         conn = sqlite3.connect(DB_PATH)
@@ -45,6 +55,7 @@ def get_db_connection():
 def get_cursor(conn):
     """Returns a cursor that behaves like a dictionary."""
     if DATABASE_URL:
+        from psycopg2.extras import RealDictCursor
         return conn.cursor(cursor_factory=RealDictCursor)
     return conn.cursor()
 
