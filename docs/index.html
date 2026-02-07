@@ -4,7 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Decision Broker API - Get Started</title>
+    <title>Decision Broker API - AI-to-AI Decision Intelligence</title>
+    <meta name="description"
+        content="Intelligent decision-making API for AI agents. Sales timing, model selection, retry intelligence.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
     <style>
         * {
@@ -13,75 +17,564 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --accent: #06b6d4;
+            --success: #10b981;
+            --bg-dark: #0f172a;
+            --bg-card: rgba(30, 41, 59, 0.7);
+            --text: #f1f5f9;
+            --text-muted: #94a3b8;
+        }
+
         body {
-            font-family: 'Segoe UI', system-ui, sans-serif;
-            background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+            font-family: 'Inter', system-ui, sans-serif;
+            background: var(--bg-dark);
             min-height: 100vh;
-            color: #fff;
+            color: var(--text);
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        .bg-gradient {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background:
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(99, 102, 241, 0.3), transparent),
+                radial-gradient(ellipse 60% 40% at 100% 100%, rgba(6, 182, 212, 0.2), transparent),
+                radial-gradient(ellipse 40% 40% at 0% 100%, rgba(139, 92, 246, 0.2), transparent);
+            z-index: -1;
+        }
+
+        /* Floating particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(99, 102, 241, 0.5);
+            border-radius: 50%;
+            animation: float 15s infinite ease-in-out;
+        }
+
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-100vh) rotate(720deg);
+                opacity: 0;
+            }
         }
 
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 40px 20px;
+            padding: 20px;
+            position: relative;
         }
 
-        header {
+        /* Navbar */
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            margin-bottom: 40px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        /* Hero section */
+        .hero {
             text-align: center;
-            margin-bottom: 60px;
+            padding: 60px 0 80px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(99, 102, 241, 0.15);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            color: var(--accent);
+            margin-bottom: 24px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4);
+            }
+
+            50% {
+                box-shadow: 0 0 0 10px rgba(99, 102, 241, 0);
+            }
         }
 
         h1 {
-            font-size: 3rem;
-            margin-bottom: 10px;
-            background: linear-gradient(90deg, #00d4ff, #7b2fff);
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #fff 0%, #a5b4fc 50%, var(--accent) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
 
-        .tagline {
-            font-size: 1.3rem;
-            color: #a0a0a0;
+        .hero-subtitle {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 40px;
+            line-height: 1.7;
         }
 
-        /* Steps indicator */
-        .steps {
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 32px;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            border: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(99, 102, 241, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Trust badges */
+        .trust-section {
             display: flex;
             justify-content: center;
-            gap: 20px;
-            margin-bottom: 40px;
+            gap: 40px;
+            margin: 60px 0;
+            flex-wrap: wrap;
         }
 
-        .step {
+        .trust-badge {
             display: flex;
             align-items: center;
-            gap: 10px;
-            color: #666;
+            gap: 12px;
+            color: var(--text-muted);
         }
 
-        .step.active {
-            color: #00d4ff;
-        }
-
-        .step-num {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            border: 2px solid currentColor;
+        .trust-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .trust-text {
+            text-align: left;
+        }
+
+        .trust-text strong {
+            display: block;
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        /* Stats */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 24px;
+            margin: 80px 0;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 24px;
+        }
+
+        .stat-number {
+            font-size: 3rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-label {
+            color: var(--text-muted);
+            margin-top: 8px;
+        }
+
+        /* Features */
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+        }
+
+        .section-title p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin-bottom: 100px;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 32px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            border-color: rgba(99, 102, 241, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Signup flow */
+        .signup-section {
+            margin: 100px 0;
+        }
+
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 48px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .glass-card h2 {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: var(--text);
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .input-group input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .api-key-display {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+            font-family: 'Monaco', 'Courier New', monospace;
+            word-break: break-all;
+        }
+
+        .copy-btn {
+            background: var(--success);
+            color: var(--bg-dark);
+            padding: 10px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: transform 0.2s;
+        }
+
+        .copy-btn:hover {
+            transform: scale(1.05);
+        }
+
+        /* Pricing */
+        .pricing {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            margin: 100px 0;
+        }
+
+        .price-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 24px;
+            padding: 40px 32px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .price-card.popular {
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .price-card.popular::before {
+            content: 'MOST POPULAR';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            padding: 6px 20px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+
+        .price-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .price-card.popular:hover {
+            transform: scale(1.05) translateY(-8px);
+        }
+
+        .price-name {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+        }
+
+        .price-amount {
+            font-size: 3.5rem;
+            font-weight: 800;
+        }
+
+        .price-amount span {
+            font-size: 1rem;
+            color: var(--text-muted);
+        }
+
+        .price-credits {
+            color: var(--accent);
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 16px 0 24px;
+        }
+
+        .price-features {
+            list-style: none;
+            margin-bottom: 32px;
+        }
+
+        .price-features li {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .price-features li::before {
+            content: '✓';
+            color: var(--success);
             font-weight: bold;
         }
 
-        .step.completed .step-num {
-            background: #00d4ff;
-            border-color: #00d4ff;
-            color: #000;
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 60px 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
         }
 
-        /* Sections */
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .delay-1 {
+            animation-delay: 0.1s;
+        }
+
+        .delay-2 {
+            animation-delay: 0.2s;
+        }
+
+        .delay-3 {
+            animation-delay: 0.3s;
+        }
+
+        /* Section visibility */
         .section {
             display: none;
         }
@@ -90,342 +583,335 @@
             display: block;
         }
 
-        /* Signup section */
-        .signup-box {
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            padding: 50px;
-            max-width: 500px;
-            margin: 0 auto 40px;
-            text-align: center;
-        }
-
-        .signup-box h2 {
-            margin-bottom: 30px;
-        }
-
-        .input-group {
-            margin-bottom: 20px;
-        }
-
-        .input-group input {
-            width: 100%;
-            padding: 15px 20px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            background: rgba(0, 0, 0, 0.3);
-            color: #fff;
-            font-size: 1rem;
-        }
-
-        .input-group input::placeholder {
-            color: #666;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 15px 40px;
-            background: linear-gradient(90deg, #00d4ff, #7b2fff);
-            border: none;
-            border-radius: 30px;
-            color: #fff;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s;
-            width: 100%;
-        }
-
-        .btn:hover {
-            transform: scale(1.02);
-            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.4);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* API Key display */
-        .api-key-display {
-            background: rgba(0, 212, 255, 0.1);
-            border: 1px solid #00d4ff;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
-            word-break: break-all;
-            font-family: monospace;
-            font-size: 1.1rem;
-        }
-
-        .copy-btn {
-            background: #00d4ff;
-            color: #000;
-            padding: 8px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-
-        /* Pricing */
-        .pricing {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 30px;
-            margin-bottom: 60px;
-        }
-
-        .plan {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            padding: 40px 30px;
-            text-align: center;
-            transition: transform 0.3s, box-shadow 0.3s;
-        }
-
-        .plan:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 40px rgba(0, 212, 255, 0.2);
-        }
-
-        .plan.popular {
-            border-color: #00d4ff;
-            background: rgba(0, 212, 255, 0.1);
-        }
-
-        .plan-name {
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-        }
-
-        .plan-price {
-            font-size: 3rem;
-            font-weight: bold;
-            margin: 20px 0;
-        }
-
-        .plan-price span {
-            font-size: 1rem;
-            color: #a0a0a0;
-        }
-
-        .plan-credits {
-            font-size: 1.2rem;
-            color: #00d4ff;
-            margin-bottom: 30px;
-        }
-
-        .plan-features {
-            list-style: none;
-            margin-bottom: 30px;
-        }
-
-        .plan-features li {
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .plan .btn {
-            width: auto;
-            padding: 15px 40px;
-        }
-
-        /* Features */
-        .features {
-            text-align: center;
-            margin-bottom: 60px;
-        }
-
-        .features h2 {
+        /* Steps */
+        .steps-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
             margin-bottom: 40px;
         }
 
-        .feature-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 30px;
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: var(--text-muted);
         }
 
-        .feature {
-            background: rgba(255, 255, 255, 0.03);
-            padding: 30px;
-            border-radius: 15px;
+        .step-item.active {
+            color: var(--accent);
         }
 
-        .feature h3 {
-            color: #00d4ff;
-            margin-bottom: 10px;
+        .step-item.completed {
+            color: var(--success);
         }
 
-        footer {
-            text-align: center;
-            padding: 40px;
-            color: #666;
+        .step-circle {
+            width: 32px;
+            height: 32px;
+            border: 2px solid currentColor;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
         }
 
-        footer a {
-            color: #00d4ff;
+        .step-item.completed .step-circle {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
         }
 
         .success-msg {
-            color: #00ff88;
-            margin-top: 15px;
+            color: var(--success);
+            margin-top: 16px;
         }
 
         .error-msg {
-            color: #ff4444;
-            margin-top: 15px;
+            color: #ef4444;
+            margin-top: 16px;
         }
 
-        .balance-display {
-            background: rgba(0, 255, 136, 0.1);
-            border: 1px solid #00ff88;
-            border-radius: 10px;
-            padding: 15px;
-            margin-top: 20px;
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .trust-section {
+                gap: 24px;
+            }
+
+            .price-card.popular {
+                transform: none;
+            }
+
+            .price-card.popular:hover {
+                transform: translateY(-8px);
+            }
         }
     </style>
 </head>
 
 <body>
+    <div class="bg-gradient"></div>
+    <div class="particles" id="particles"></div>
+
     <div class="container">
-        <header>
-            <h1>🧠 Decision Broker API</h1>
-            <p class="tagline">AI-Powered Decision Intelligence for Your Business</p>
-        </header>
-
-        <!-- Steps Indicator -->
-        <div class="steps">
-            <div class="step active" id="step1-ind">
-                <div class="step-num">1</div>
-                <span>Sign Up</span>
+        <nav>
+            <div class="logo">
+                <div class="logo-icon">🧠</div>
+                <span>Decision Broker</span>
             </div>
-            <div class="step" id="step2-ind">
-                <div class="step-num">2</div>
-                <span>Get API Key</span>
+            <div class="nav-links">
+                <a href="#features">Features</a>
+                <a href="#pricing">Pricing</a>
+                <a href="https://web-production-1ace.up.railway.app/docs" target="_blank">API Docs</a>
+                <a href="https://web-production-1ace.up.railway.app/redoc" target="_blank">ReDoc</a>
             </div>
-            <div class="step" id="step3-ind">
-                <div class="step-num">3</div>
-                <span>Buy Credits</span>
+        </nav>
+
+        <!-- Hero -->
+        <section class="hero fade-in">
+            <div class="badge">
+                <span>⚡</span>
+                <span>AI-to-AI Decision Intelligence</span>
             </div>
-        </div>
-
-        <!-- Step 1: Signup -->
-        <div class="section active" id="step1">
-            <div class="signup-box">
-                <h2>🚀 Get Started Free</h2>
-                <p style="color: #a0a0a0; margin-bottom: 30px;">Enter your email to create an account and get 5 free
-                    credits!</p>
-                <div class="input-group">
-                    <input type="email" id="email" placeholder="your@email.com">
-                </div>
-                <button class="btn" onclick="signup()" id="signupBtn">Create Account</button>
-                <div id="signupMsg"></div>
+            <h1>Make Smarter Decisions.<br>Automatically.</h1>
+            <p class="hero-subtitle">
+                Your AI agents call our API to get intelligent decisions for sales timing,
+                model selection, and retry strategies. Pay per decision, scale infinitely.
+            </p>
+            <div class="hero-buttons">
+                <button class="btn btn-primary" onclick="scrollToSignup()">
+                    Get Started Free →
+                </button>
+                <a href="https://web-production-1ace.up.railway.app/docs" class="btn btn-secondary" target="_blank">
+                    View API Docs
+                </a>
             </div>
-        </div>
+        </section>
 
-        <!-- Step 2: Show API Key -->
-        <div class="section" id="step2">
-            <div class="signup-box">
-                <h2>🔑 Your API Key</h2>
-                <p style="color: #a0a0a0; margin-bottom: 20px;">Save this key! You'll need it to use the API.</p>
-                <div class="api-key-display" id="apiKeyDisplay"></div>
-                <button class="copy-btn" onclick="copyKey()">📋 Copy Key</button>
-                <div class="balance-display">
-                    <strong>Current Balance:</strong> <span id="balanceDisplay">5</span> credits
-                </div>
-                <p style="margin-top: 20px; color: #a0a0a0;">You have 5 free credits to try the API!</p>
-                <button class="btn" onclick="goToStep3()" style="margin-top: 30px;">Buy More Credits →</button>
-            </div>
-        </div>
-
-        <!-- Step 3: Buy Credits -->
-        <div class="section" id="step3">
-            <div class="signup-box" style="max-width: 600px;">
-                <h2>💳 Buy Credits</h2>
-                <p style="color: #a0a0a0; margin-bottom: 10px;">Your API Key:</p>
-                <div class="api-key-display" id="apiKeyDisplay2" style="font-size: 0.9rem;"></div>
-            </div>
-
-            <div class="pricing">
-                <div class="plan">
-                    <div class="plan-name">Starter</div>
-                    <div class="plan-price">₹199 <span>one-time</span></div>
-                    <div class="plan-credits">100 Credits</div>
-                    <ul class="plan-features">
-                        <li>₹1.99 per decision</li>
-                        <li>All decision types</li>
-                        <li>API access</li>
-                    </ul>
-                    <button class="btn" onclick="pay(19900, 100)">Buy Now</button>
-                </div>
-
-                <div class="plan popular">
-                    <div class="plan-name">⭐ Professional</div>
-                    <div class="plan-price">₹499 <span>one-time</span></div>
-                    <div class="plan-credits">500 Credits</div>
-                    <ul class="plan-features">
-                        <li>₹0.99 per decision</li>
-                        <li>All decision types</li>
-                        <li>Priority support</li>
-                    </ul>
-                    <button class="btn" onclick="pay(49900, 500)">Buy Now</button>
-                </div>
-
-                <div class="plan">
-                    <div class="plan-name">Enterprise</div>
-                    <div class="plan-price">₹999 <span>one-time</span></div>
-                    <div class="plan-credits">2000 Credits</div>
-                    <ul class="plan-features">
-                        <li>₹0.49 per decision</li>
-                        <li>All decision types</li>
-                        <li>Premium support</li>
-                    </ul>
-                    <button class="btn" onclick="pay(99900, 2000)">Buy Now</button>
+        <!-- Trust badges -->
+        <section class="trust-section fade-in delay-1">
+            <div class="trust-badge">
+                <div class="trust-icon">🔒</div>
+                <div class="trust-text">
+                    <strong>256-bit SSL</strong>
+                    <span>Bank-grade encryption</span>
                 </div>
             </div>
-        </div>
-
-        <div class="features">
-            <h2>What You Get</h2>
-            <div class="feature-grid">
-                <div class="feature">
-                    <h3>🎯 Sales Outreach</h3>
-                    <p>Know the perfect time to contact your leads for maximum response rates.</p>
-                </div>
-                <div class="feature">
-                    <h3>🤖 Model Selection</h3>
-                    <p>Choose the optimal AI model for your specific task automatically.</p>
-                </div>
-                <div class="feature">
-                    <h3>🔄 Retry Intelligence</h3>
-                    <p>Smart retry strategies for failed API calls with exponential backoff.</p>
+            <div class="trust-badge">
+                <div class="trust-icon">⚡</div>
+                <div class="trust-text">
+                    <strong>&lt;100ms</strong>
+                    <span>Response time</span>
                 </div>
             </div>
-        </div>
+            <div class="trust-badge">
+                <div class="trust-icon">🌍</div>
+                <div class="trust-text">
+                    <strong>99.9% Uptime</strong>
+                    <span>Always available</span>
+                </div>
+            </div>
+            <div class="trust-badge">
+                <div class="trust-icon">💳</div>
+                <div class="trust-text">
+                    <strong>Razorpay</strong>
+                    <span>Secure payments</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats -->
+        <section class="stats fade-in delay-2">
+            <div class="stat">
+                <div class="stat-number">8+</div>
+                <div class="stat-label">AI Models Supported</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">3</div>
+                <div class="stat-label">Decision Types</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">₹0.49</div>
+                <div class="stat-label">Per Decision</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">API Availability</div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section id="features" class="fade-in delay-3">
+            <div class="section-title">
+                <h2>Powered by Intelligence</h2>
+                <p>Three specialized decision engines for your AI workflows</p>
+            </div>
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">🎯</div>
+                    <h3>Sales Outreach Intelligence</h3>
+                    <p>Know exactly when to contact leads. Our AI analyzes engagement patterns, time zones, and company
+                        signals to recommend the perfect outreach moment and channel.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3>AI Model Selection</h3>
+                    <p>Automatically pick the right AI model for each task. Supports GPT-4, Claude, Gemini, Llama, and
+                        Mistral with cost estimates and fallback recommendations.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Retry Intelligence</h3>
+                    <p>Smart retry strategies with exponential backoff, jitter, and provider health awareness. Know
+                        exactly when to retry and when to switch providers.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Signup Section -->
+        <section id="signup" class="signup-section">
+            <div class="steps-indicator">
+                <div class="step-item active" id="step1-ind">
+                    <div class="step-circle">1</div>
+                    <span>Sign Up</span>
+                </div>
+                <div class="step-item" id="step2-ind">
+                    <div class="step-circle">2</div>
+                    <span>Get API Key</span>
+                </div>
+                <div class="step-item" id="step3-ind">
+                    <div class="step-circle">3</div>
+                    <span>Buy Credits</span>
+                </div>
+            </div>
+
+            <!-- Step 1: Signup -->
+            <div class="section active" id="step1">
+                <div class="glass-card">
+                    <h2>🚀 Start Free</h2>
+                    <p style="text-align: center; color: var(--text-muted); margin-bottom: 32px;">
+                        Get 5 free credits to try the API
+                    </p>
+                    <div class="input-group">
+                        <label>Email Address</label>
+                        <input type="email" id="email" placeholder="you@company.com">
+                    </div>
+                    <button class="btn btn-primary btn-full" onclick="signup()" id="signupBtn">
+                        Create Free Account
+                    </button>
+                    <div id="signupMsg"></div>
+                </div>
+            </div>
+
+            <!-- Step 2: API Key -->
+            <div class="section" id="step2">
+                <div class="glass-card">
+                    <h2>🔑 Your API Key</h2>
+                    <p style="text-align: center; color: var(--text-muted); margin-bottom: 20px;">
+                        Save this key securely - you'll need it to make API calls
+                    </p>
+                    <div class="api-key-display" id="apiKeyDisplay"></div>
+                    <button class="copy-btn" onclick="copyKey()">📋 Copy to Clipboard</button>
+                    <p style="text-align: center; margin-top: 24px; color: var(--success);">
+                        ✓ You have 5 free credits!
+                    </p>
+                    <button class="btn btn-primary btn-full" onclick="goToStep3()" style="margin-top: 24px;">
+                        Continue to Buy Credits →
+                    </button>
+                </div>
+            </div>
+
+            <!-- Step 3: Pricing -->
+            <div class="section" id="step3">
+                <div class="glass-card" style="max-width: 600px;">
+                    <h2>💳 Your API Key</h2>
+                    <div class="api-key-display" id="apiKeyDisplay2" style="font-size: 0.85rem;"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pricing -->
+        <section id="pricing" class="pricing">
+            <div class="price-card">
+                <div class="price-name">Starter</div>
+                <div class="price-amount">₹199</div>
+                <div class="price-credits">100 Credits</div>
+                <ul class="price-features">
+                    <li>₹1.99 per decision</li>
+                    <li>All 3 decision types</li>
+                    <li>Full API access</li>
+                    <li>Never expires</li>
+                </ul>
+                <button class="btn btn-primary" onclick="pay(19900, 100)">Buy Now</button>
+            </div>
+
+            <div class="price-card popular">
+                <div class="price-name">Professional</div>
+                <div class="price-amount">₹499</div>
+                <div class="price-credits">500 Credits</div>
+                <ul class="price-features">
+                    <li>₹0.99 per decision</li>
+                    <li>All 3 decision types</li>
+                    <li>Priority support</li>
+                    <li>Never expires</li>
+                </ul>
+                <button class="btn btn-primary" onclick="pay(49900, 500)">Buy Now</button>
+            </div>
+
+            <div class="price-card">
+                <div class="price-name">Enterprise</div>
+                <div class="price-amount">₹999</div>
+                <div class="price-credits">2000 Credits</div>
+                <ul class="price-features">
+                    <li>₹0.49 per decision</li>
+                    <li>All 3 decision types</li>
+                    <li>Premium support</li>
+                    <li>Never expires</li>
+                </ul>
+                <button class="btn btn-primary" onclick="pay(99900, 2000)">Buy Now</button>
+            </div>
+        </section>
 
         <footer>
-            <p>API Docs: <a
-                    href="https://web-production-1ace.up.railway.app/docs">web-production-1ace.up.railway.app/docs</a>
+            <p style="margin-bottom: 16px;">
+                <a href="https://web-production-1ace.up.railway.app/docs" target="_blank">API Docs</a> ·
+                <a href="https://web-production-1ace.up.railway.app/redoc" target="_blank">ReDoc</a> ·
+                <a href="https://web-production-1ace.up.railway.app/health" target="_blank">Status</a>
             </p>
-            <p style="margin-top: 10px;">© 2026 Decision Broker. All rights reserved.</p>
+            <p>© 2026 Decision Broker. Built for AI, by AI engineers.</p>
         </footer>
     </div>
 
     <script>
+        // Create floating particles
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 20; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 15 + 's';
+            particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+            particlesContainer.appendChild(particle);
+        }
+
         const API_BASE = 'https://web-production-1ace.up.railway.app';
         const RAZORPAY_KEY = 'rzp_live_SDKaBS60R3VLkH';
 
         let currentApiKey = localStorage.getItem('decision_broker_api_key') || '';
 
-        // Check if user already has a key
         if (currentApiKey) {
             document.getElementById('apiKeyDisplay').textContent = currentApiKey;
             document.getElementById('apiKeyDisplay2').textContent = currentApiKey;
             goToStep3();
+        }
+
+        function scrollToSignup() {
+            document.getElementById('signup').scrollIntoView({ behavior: 'smooth' });
         }
 
         async function signup() {
@@ -456,7 +942,6 @@
                     document.getElementById('apiKeyDisplay').textContent = currentApiKey;
                     document.getElementById('apiKeyDisplay2').textContent = currentApiKey;
 
-                    // Move to step 2
                     document.getElementById('step1').classList.remove('active');
                     document.getElementById('step2').classList.add('active');
                     document.getElementById('step1-ind').classList.remove('active');
@@ -470,12 +955,14 @@
             }
 
             btn.disabled = false;
-            btn.textContent = 'Create Account';
+            btn.textContent = 'Create Free Account';
         }
 
         function copyKey() {
             navigator.clipboard.writeText(currentApiKey);
-            alert('API Key copied to clipboard!');
+            const btn = event.target;
+            btn.textContent = '✓ Copied!';
+            setTimeout(() => btn.textContent = '📋 Copy to Clipboard', 2000);
         }
 
         function goToStep3() {
@@ -492,6 +979,7 @@
         function pay(amount, credits) {
             if (!currentApiKey) {
                 alert('Please sign up first!');
+                scrollToSignup();
                 return;
             }
 
@@ -505,13 +993,10 @@
                     api_key: currentApiKey
                 },
                 handler: function (response) {
-                    alert('Payment successful! ' + credits + ' credits will be added to your account shortly.');
-                },
-                prefill: {
-                    email: ''
+                    alert('✓ Payment successful! ' + credits + ' credits will be added shortly.');
                 },
                 theme: {
-                    color: '#7b2fff'
+                    color: '#6366f1'
                 }
             };
 
