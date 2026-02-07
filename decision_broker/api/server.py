@@ -278,7 +278,8 @@ class SubscribeRequest(BaseModel):
     plan: str  # starter, pro, business
     api_key: str
 
-@app.post("/subscribe")
+@app.post("/subscribe", tags=["💳 Billing"], summary="Create Subscription",
+          description="Create a recurring subscription for monthly credit auto-refills.")
 def create_subscription(data: SubscribeRequest):
     """
     Create a Razorpay subscription for monthly auto-renewal of credits.
@@ -360,7 +361,8 @@ def create_subscription(data: SubscribeRequest):
             "message": "Visit the payment page to subscribe"
         }
 
-@app.get("/subscription-status")
+@app.get("/subscription-status", tags=["💳 Billing"], summary="Check Subscription Status",
+         description="Check if your account has an active recurring subscription.")
 def subscription_status(x_api_key: str = Header(..., alias="X-API-Key")):
     """Check subscription status for an API key."""
     user_id = validate_api_key(x_api_key)
@@ -448,7 +450,7 @@ def decide(data: DecisionAPIRequest, x_api_key: str = Header(..., alias="X-API-K
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/webhook/razorpay")
+@app.post("/webhook/razorpay", include_in_schema=False)
 async def razorpay_webhook(request: Request):
     """
     Handle Razorpay Webhooks (payment.captured).
