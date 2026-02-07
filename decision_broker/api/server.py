@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Header, Depends, Request
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Dict, Any, Optional
 import os
@@ -34,9 +35,24 @@ from decision_broker.core.billing.credits import add_credits
 
 app = FastAPI(title="Decision Broker API", version="1.0.0")
 
+# CORS for RapidAPI testing console
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 class DecisionAPIRequest(BaseModel):
     decision_type: str
     payload: Dict[str, Any]
+
+@app.get("/health")
+def health_check():
+    """Health check endpoint for RapidAPI monitoring."""
+    return {"status": "ok", "version": "1.0.0"}
+
 
 @app.post("/decide")
 def decide(data: DecisionAPIRequest, x_api_key: str = Header(..., alias="X-API-Key")):

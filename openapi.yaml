@@ -1,0 +1,98 @@
+openapi: 3.0.0
+info:
+  title: Decision Broker API
+  description: AI-to-AI Decision Intelligence Service for sales outreach timing, model selection, and retry intelligence.
+  version: "1.0.0"
+
+servers:
+  - url: https://your-api-domain.com
+
+paths:
+  /decide:
+    post:
+      summary: Get AI Decision
+      description: Submit a decision request and receive an AI-powered recommendation. Each call consumes 1 credit.
+      operationId: makeDecision
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - decision_type
+                - payload
+              properties:
+                decision_type:
+                  type: string
+                  description: Type of decision (sales_outreach, model_selection, retry_intelligence)
+                payload:
+                  type: object
+                  description: Context-specific data for the decision
+            example:
+              decision_type: sales_outreach
+              payload:
+                lead_id: "lead_12345"
+                timezone: "Asia/Kolkata"
+                industry: "technology"
+      responses:
+        "200":
+          description: Successful decision
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  decision:
+                    type: string
+                  confidence:
+                    type: number
+                  ttl:
+                    type: integer
+                  credits_used:
+                    type: integer
+                  reason_code:
+                    type: string
+              example:
+                decision: "contact_now"
+                confidence: 0.87
+                ttl: 3600
+                credits_used: 1
+                reason_code: "optimal_window"
+        "400":
+          description: Invalid request
+        "401":
+          description: Invalid API key
+        "402":
+          description: Insufficient credits
+
+  /health:
+    get:
+      summary: Health Check
+      description: Returns API health status
+      operationId: healthCheck
+      responses:
+        "200":
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                  version:
+                    type: string
+              example:
+                status: ok
+                version: "1.0.0"
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+security:
+  - ApiKeyAuth: []

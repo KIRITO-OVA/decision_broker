@@ -23,6 +23,9 @@ It sells deterministic decisions via API, gatekept by API Keys and Credits.
    - Ensure `ENV=prod` in `.env`.
    - Run `python -m uvicorn decision_broker.api.server:app --port 8000`.
 
+3. **One-Click Startup**:
+   - Simply double-click `start_server.bat` to launch the API server with environment setup and auto-reload enabled.
+
 ## Configuration
 1. Copy `.env.template` to `.env`
 2. Set `ENV=prod`
@@ -39,3 +42,13 @@ It sells deterministic decisions via API, gatekept by API Keys and Credits.
 - [x] /decide is stable
 - [x] Hard Stop verified
 
+## RapidAPI Marketplace
+
+To list this API on RapidAPI:
+
+1. **Deploy API** to a public URL (Railway, Render, AWS, etc.)
+2. **Go to** [rapidapi.com/studio](https://rapidapi.com/studio)
+3. **Create API Project** → Import `openapi.yaml`
+4. **Set Base URL** to your deployed server URL
+5. **Test** endpoints in RapidAPI console
+6. **Publish** to marketplace
