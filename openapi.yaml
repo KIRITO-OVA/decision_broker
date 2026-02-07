@@ -5,7 +5,8 @@ info:
   version: "1.0.0"
 
 servers:
-  - url: https://your-api-domain.com
+  - url: https://web-production-1ace.up.railway.app
+    description: Production Server (Railway)
 
 paths:
   /decide:
@@ -65,6 +66,59 @@ paths:
           description: Invalid API key
         "402":
           description: Insufficient credits
+
+  /crypto/purchase:
+    post:
+      summary: Get Crypto Payment Details
+      tags: ["🪙 Crypto Payments"]
+      description: Returns the wallet address and instructions for AI-to-AI crypto payments.
+      operationId: getCryptoPayment
+      responses:
+        "200":
+          description: Payment details retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  wallet_address:
+                    type: string
+                  network:
+                    type: string
+                  asset:
+                    type: string
+                  amount_usd:
+                    type: number
+                  instructions:
+                    type: string
+
+  /crypto/verify:
+    post:
+      summary: Verify Crypto Transaction
+      tags: ["🪙 Crypto Payments"]
+      description: (Authenticated) Submits a transaction hash for on-chain verification to add credits.
+      operationId: verifyCryptoPayment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - api_key
+                - transaction_hash
+              properties:
+                api_key:
+                  type: string
+                transaction_hash:
+                  type: string
+      responses:
+        "200":
+          description: Transaction verified and credits added
+        "400":
+          description: Invalid transaction or already processed
+        "401":
+          description: Invalid API Key
 
   /health:
     get:
