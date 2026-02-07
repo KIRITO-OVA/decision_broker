@@ -1,7 +1,10 @@
 import sqlite3
 import os
-import psycopg2
-from psycopg2.extras import RealDictCursor
+try:
+    import psycopg2
+    from psycopg2.extras import RealDictCursor
+except ImportError:
+    psycopg2 = None
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -11,6 +14,11 @@ def view_all_users():
     db_path = "decision_broker.db"
     
     if database_url:
+        if psycopg2 is None:
+            print("\n❌ Error: 'psycopg2-binary' is not installed locally.")
+            print("To view production data from your computer, run: pip install psycopg2-binary")
+            return
+            
         print(f"🔗 Connecting to Production Database (PostgreSQL)...")
         try:
             conn = psycopg2.connect(database_url, sslmode='require')

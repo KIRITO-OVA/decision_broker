@@ -27,7 +27,7 @@ def get_db_connection():
     """Context manager for database connection. Supports SQLite and PostgreSQL."""
     if DATABASE_URL:
         # PostgreSQL (Production)
-        conn = psycopg2.connect(DATABASE_URL, sslmode='require')
+        conn = psycopg2.connect(DATABASE_URL)
         conn.autocommit = False
         try:
             yield conn
