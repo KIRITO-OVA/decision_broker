@@ -121,14 +121,38 @@ app = FastAPI(
     docs_url="/docs",
 )
 
-# CORS for RapidAPI testing console
+# Restricted CORS - Only allow official domains and local dev
+ALLOWED_ORIGINS = [
+    "https://kirito-ova.github.io",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://web-production-1ace.up.railway.app", # Self-reference
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=ALLOWED_ORIGINS,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    """Sanitize all unhandled exceptions to prevent data leaks."""
+    if isinstance(exc, HTTPException):
+        return await http_exception_handler(request, exc)
+    
+    # Log the detail internally (simulation)
+    print(f"[ERROR] Unhandled Exception: {str(exc)}")
+    
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "An internal server error occurred. Please contact support if the problem persists."},
+    )
+
+from fastapi.exception_handlers import http_exception_handler
+from fastapi.responses import JSONResponse
 
 class DecisionAPIRequest(BaseModel):
     """Request body for making a decision."""
@@ -257,10 +281,12 @@ def signup(data: SignupRequest):
         existing = cursor.fetchone()
         
         if existing:
+            # Mask the API key for security (prevent email-based scraping)
+            masked_key = f"{existing['api_key'][:8]}...{existing['api_key'][-4:]}"
             return SignupResponse(
                 success=True,
-                api_key=existing["api_key"],
-                message="Account already exists. Here's your API key."
+                api_key=masked_key,
+                message="Account already exists. Use your existing API key."
             )
         
         # Create new user with 5 free credits
@@ -440,7 +466,7 @@ def crypto_purchase(data: CryptoPurchaseRequest):
         "instructions": f"Send {usdt_amount} USDT to the address above on Polygon network, then call /crypto/verify with your TX hash."
     }
 
-@app.post("/crypto/verify", tags=["🪙 Crypto Payments"], summary="Verify Crypto Transaction")
+@app.post("/crypto/verify", tags=["🪙 Crypto Payments"], summary="Verify Crypto Transaction", include_in_schema=False)
 def crypto_verify(data: CryptoVerifyRequest):
     """
     Verifies a crypto transaction hash and adds credits to the user account.
