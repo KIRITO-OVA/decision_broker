@@ -3,6 +3,11 @@ info:
   title: Decision Broker API
   description: AI-to-AI Decision Intelligence Service for sales outreach timing, model selection, and retry intelligence.
   version: "1.0.0"
+  contact:
+    name: Decision Broker Support
+    url: https://kirito-ova.github.io/decision_broker
+  license:
+    name: Proprietary
 
 servers:
   - url: https://web-production-1ace.up.railway.app
@@ -11,6 +16,8 @@ servers:
 paths:
   /decide:
     post:
+      tags:
+        - "Decisions"
       summary: Get AI Decision
       description: Submit a decision request and receive an AI-powered recommendation. Each call consumes 1 credit.
       operationId: makeDecision
@@ -27,15 +34,17 @@ paths:
                 decision_type:
                   type: string
                   description: Type of decision (sales_outreach, model_selection, retry_intelligence)
+                  enum: [sales_outreach, model_selection, retry_intelligence]
                 payload:
                   type: object
                   description: Context-specific data for the decision
             example:
               decision_type: sales_outreach
               payload:
-                lead_id: "lead_12345"
-                timezone: "Asia/Kolkata"
-                industry: "technology"
+                lead_activity: 0.8
+                last_contact_days: 5
+                time_context: "morning"
+                company_signals: 0.9
       responses:
         "200":
           description: Successful decision
@@ -45,32 +54,51 @@ paths:
                 type: object
                 properties:
                   decision:
-                    type: string
+                    type: object
+                    properties:
+                      action:
+                        type: string
+                      reason:
+                        type: string
                   confidence:
                     type: number
-                  ttl:
-                    type: integer
-                  credits_used:
-                    type: integer
                   reason_code:
                     type: string
-              example:
-                decision: "contact_now"
-                confidence: 0.87
-                ttl: 3600
-                credits_used: 1
-                reason_code: "optimal_window"
+                  valid_for_seconds:
+                    type: integer
         "400":
           description: Invalid request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
         "401":
           description: Invalid API key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
         "402":
           description: Insufficient credits
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
 
   /crypto/purchase:
     post:
+      tags:
+        - "Crypto Payments"
       summary: Get Crypto Payment Details
-      tags: ["🪙 Crypto Payments"]
       description: Returns the wallet address and instructions for AI-to-AI crypto payments.
       operationId: getCryptoPayment
       responses:
@@ -91,11 +119,21 @@ paths:
                     type: number
                   instructions:
                     type: string
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
 
   /crypto/verify:
     post:
+      tags:
+        - "Crypto Payments"
       summary: Verify Crypto Transaction
-      tags: ["🪙 Crypto Payments"]
       description: (Authenticated) Submits a transaction hash for on-chain verification to add credits.
       operationId: verifyCryptoPayment
       requestBody:
@@ -115,13 +153,40 @@ paths:
       responses:
         "200":
           description: Transaction verified and credits added
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  new_balance:
+                    type: integer
         "400":
           description: Invalid transaction or already processed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
         "401":
           description: Invalid API Key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
 
   /health:
     get:
+      tags:
+        - "General"
       summary: Health Check
       description: Returns API health status
       operationId: healthCheck
@@ -137,9 +202,6 @@ paths:
                     type: string
                   version:
                     type: string
-              example:
-                status: ok
-                version: "1.0.0"
 
 components:
   securitySchemes:
